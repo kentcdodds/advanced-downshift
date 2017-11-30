@@ -19,6 +19,7 @@ class RecipientInput extends React.Component {
     event,
     isOpen,
     selectHighlightedItem,
+    highlightedIndex,
     reset,
     inputValue,
   }) => {
@@ -34,16 +35,23 @@ class RecipientInput extends React.Component {
       )
     } else if (isOpen && ['Tab', ',', ';'].includes(event.key)) {
       event.preventDefault()
-      // todo select highlighted item if there is something highlighted
-      this.setState(
-        ({selectedContacts}) => ({
-          selectedContacts: [
-            ...selectedContacts,
-            {id: inputValue.toLowerCase(), email: inputValue, name: inputValue},
-          ],
-        }),
-        () => reset(),
-      )
+      if (highlightedIndex != null) {
+        selectHighlightedItem()
+      } else {
+        this.setState(
+          ({selectedContacts}) => ({
+            selectedContacts: [
+              ...selectedContacts,
+              {
+                id: inputValue.toLowerCase(),
+                email: inputValue,
+                name: inputValue,
+              },
+            ],
+          }),
+          () => reset(),
+        )
+      }
     }
   }
   removeContact(contact) {
@@ -108,6 +116,7 @@ class RecipientInput extends React.Component {
                     this.handleInputKeyDown({
                       event,
                       selectHighlightedItem,
+                      highlightedIndex,
                       isOpen,
                       reset,
                       inputValue,
@@ -131,8 +140,10 @@ class RecipientInput extends React.Component {
                 omitContacts={selectedContacts}
                 onLoaded={({contacts}) => {
                   clearItems()
-                  setHighlightedIndex(0)
-                  contacts && setItemCount(contacts.length)
+                  if (contacts) {
+                    setHighlightedIndex(contacts.length ? 0 : null)
+                    setItemCount(contacts.length)
+                  }
                 }}
                 render={({loading, contacts, error}) => (
                   <div
