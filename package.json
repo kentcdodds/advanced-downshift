@@ -1,0 +1,22 @@
+{
+  "name": "gmail-recipient-field-with-downshift",
+  "description": "This is an example of how to use downshift to build a gmail-like recipient field.",
+  "version": "0.0.196",
+  "dependencies": {
+    "starwars-names": "1.6.0",
+    "react-dom": "16.1.1",
+    "react": "16.1.1",
+    "match-sorter": "2.2.0",
+    "glamor": "2.20.40",
+    "downshift": "1.20.0"
+  },
+  "devDependencies": {
+    "react-scripts": "1.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
