@@ -2,8 +2,8 @@ import React, {Component} from 'react'
 import {render} from 'react-dom'
 import {css} from 'glamor'
 import Downshift from 'downshift'
-import {ComposeMail, Recipient} from './components'
-import {fetchContacts} from './api'
+import {List} from 'react-virtualized'
+import {ComposeMail, Recipient, FetchContacts} from './components'
 
 class RecipientInput extends React.Component {
   state = {selectedContacts: []}
@@ -78,6 +78,7 @@ class RecipientInput extends React.Component {
           reset,
           inputValue,
           clearItems,
+          setItemCount,
         }) => (
           <div>
             <label {...getLabelProps({style: {display: 'none'}})}>
@@ -92,7 +93,11 @@ class RecipientInput extends React.Component {
               })}
             >
               {selectedContacts.map(c => (
-                <Recipient key={c.id} onRemove={() => this.removeContact(c)}>
+                <Recipient
+                  key={c.id}
+                  isValid={c.email.includes('@')}
+                  onRemove={() => this.removeContact(c)}
+                >
                   {this.itemToString(c)}
                 </Recipient>
               ))}
@@ -124,11 +129,11 @@ class RecipientInput extends React.Component {
               <FetchContacts
                 searchValue={inputValue}
                 omitContacts={selectedContacts}
-                onLoaded={() => {
+                onLoaded={({contacts}) => {
                   clearItems()
                   setHighlightedIndex(0)
+                  contacts && setItemCount(contacts.length)
                 }}
-                limit={10}
                 render={({loading, contacts, error}) => (
                   <div
                     className={css({
@@ -146,29 +151,11 @@ class RecipientInput extends React.Component {
                     ) : error ? (
                       <div className={css({padding: 10})}>error...</div>
                     ) : contacts.length ? (
-                      contacts.map((item, index) => (
-                        <div
-                          key={item.id}
-                          {...getItemProps({
-                            item,
-                            index,
-                            className: css({
-                              cursor: 'pointer',
-                              paddingLeft: 10,
-                              paddingRight: 10,
-                              backgroundColor:
-                                highlightedIndex === index ? '#eee' : 'white',
-                            }),
-                          })}
-                        >
-                          <div>{item.name}</div>
-                          <div
-                            className={css({fontSize: '0.8em', marginLeft: 2})}
-                          >
-                            {item.email}
-                          </div>
-                        </div>
-                      ))
+                      <ContactList
+                        highlightedIndex={highlightedIndex}
+                        getItemProps={getItemProps}
+                        contacts={contacts}
+                      />
                     ) : (
                       <div className={css({padding: 10})}>no results...</div>
                     )}
@@ -183,76 +170,40 @@ class RecipientInput extends React.Component {
   }
 }
 
-function debounce(fn, time) {
-  let timeoutId
-  return wrapper
-  function wrapper(...args) {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-    timeoutId = setTimeout(() => {
-      timeoutId = null
-      fn(...args)
-    }, time)
-  }
-}
-
-class FetchContacts extends React.Component {
-  static initialState = {loading: false, error: null, contacts: []}
-  requestId = 0
-  state = FetchContacts.initialState
-  mounted = false
-  reset(overrides) {
-    this.setState({...FetchContacts.initialState, ...overrides})
-  }
-  fetch = debounce(() => {
-    if (!this.mounted) {
-      return
-    }
-    const {omitContacts, limit} = this.props
-    this.requestId++
-    fetchContacts(this.props.searchValue, {
-      omitContacts,
-      limit,
-      requestId: this.requestId,
-    }).then(
-      ({response: {data: contacts, requestId}}) => {
-        if (this.mounted && requestId === this.requestId) {
-          this.props.onLoaded()
-          this.setState({loading: false, contacts})
-        }
-      },
-      ({response: {error, requestId}}) => {
-        if (this.mounted && requestId === this.requestId) {
-          this.props.onLoaded()
-          this.setState({loading: false, error})
-        }
-      },
-    )
-  }, 300)
-  prepareFetch() {
-    this.reset({loading: true})
-  }
-  componentDidMount() {
-    this.mounted = true
-    this.prepareFetch()
-    this.fetch()
-  }
-  componentDidUpdate(prevProps) {
-    if (
-      prevProps.searchValue !== this.props.searchValue ||
-      prevProps.omitContacts !== this.props.omitContacts
-    ) {
-      this.prepareFetch()
-      this.fetch()
-    }
-  }
-  componentWillUnmount() {
-    this.mounted = false
-  }
-  render() {
-    return this.props.render(this.state)
-  }
+function ContactList({highlightedIndex, getItemProps, contacts, setItemCount}) {
+  const rowHeight = 40
+  return (
+    <List
+      width={300}
+      scrollToIndex={highlightedIndex || 0}
+      height={
+        contacts.length * rowHeight > 280 ? 280 : contacts.length * rowHeight
+      }
+      rowCount={contacts.length}
+      rowHeight={40}
+      rowRenderer={({key, index, style}) => (
+        <div
+          key={contacts[index].id}
+          {...getItemProps({
+            item: contacts[index],
+            index,
+            style,
+            className: css({
+              cursor: 'pointer',
+              paddingLeft: 10,
+              paddingRight: 10,
+              backgroundColor: highlightedIndex === index ? '#eee' : 'white',
+            }),
+          })}
+        >
+          <div>{contacts[index].name}</div>
+          <div className={css({fontSize: '0.8em', marginLeft: 2})}>
+            {contacts[index].email}
+          </div>
+        </div>
+      )}
+    />
+  )
 }
 
 class App extends React.Component {
