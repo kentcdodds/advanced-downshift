@@ -172,15 +172,14 @@ class RecipientInput extends React.Component {
 
 function ContactList({highlightedIndex, getItemProps, contacts, setItemCount}) {
   const rowHeight = 40
+  const fullHeight = contacts.length * rowHeight
   return (
     <List
       width={300}
       scrollToIndex={highlightedIndex || 0}
-      height={
-        contacts.length * rowHeight > 280 ? 280 : contacts.length * rowHeight
-      }
+      height={fullHeight > 280 ? 280 : fullHeight}
       rowCount={contacts.length}
-      rowHeight={40}
+      rowHeight={rowHeight}
       rowRenderer={({key, index, style}) => (
         <div
           key={contacts[index].id}
