@@ -1,6 +1,5 @@
 import React from 'react'
 import {css} from 'glamor'
-import {fetchContacts} from './api'
 
 function ComposeMail({autocomplete}) {
   return (
@@ -123,76 +122,4 @@ class Recipient extends React.Component {
   }
 }
 
-function debounce(fn, time) {
-  let timeoutId
-  return wrapper
-  function wrapper(...args) {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-    timeoutId = setTimeout(() => {
-      timeoutId = null
-      fn(...args)
-    }, time)
-  }
-}
-
-class FetchContacts extends React.Component {
-  static initialState = {loading: false, error: null, contacts: []}
-  requestId = 0
-  state = FetchContacts.initialState
-  mounted = false
-  reset(overrides) {
-    this.setState({...FetchContacts.initialState, ...overrides})
-  }
-  fetch = debounce(() => {
-    if (!this.mounted) {
-      return
-    }
-    const {omitContacts, limit} = this.props
-    this.requestId++
-    fetchContacts(this.props.searchValue, {
-      omitContacts,
-      limit,
-      requestId: this.requestId,
-    }).then(
-      ({response: {data: contacts, requestId}}) => {
-        if (this.mounted && requestId === this.requestId) {
-          this.props.onLoaded({contacts})
-          this.setState({loading: false, contacts})
-        }
-      },
-      ({response: {error, requestId}}) => {
-        if (this.mounted && requestId === this.requestId) {
-          this.props.onLoaded({error})
-          this.setState({loading: false, error})
-        }
-      },
-    )
-  }, 300)
-  prepareFetch() {
-    this.reset({loading: true})
-  }
-  componentDidMount() {
-    this.mounted = true
-    this.prepareFetch()
-    this.fetch()
-  }
-  componentDidUpdate(prevProps) {
-    if (
-      prevProps.searchValue !== this.props.searchValue ||
-      prevProps.omitContacts !== this.props.omitContacts
-    ) {
-      this.prepareFetch()
-      this.fetch()
-    }
-  }
-  componentWillUnmount() {
-    this.mounted = false
-  }
-  render() {
-    return this.props.render(this.state)
-  }
-}
-
-export {ComposeMail, Recipient, FetchContacts}
+export {ComposeMail, Recipient}
