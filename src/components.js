@@ -1,5 +1,6 @@
 import React from 'react'
 import {css} from 'glamor'
+import * as styles from './styles'
 
 function ComposeMail({autocomplete}) {
   return (
@@ -85,34 +86,12 @@ class Recipient extends React.Component {
     return (
       <div
         onClick={this.focusButton}
-        className={css({
-          backgroundColor: '#f5f5f5',
-          fontSize: '0.9em',
-          border: '1px solid',
-          borderColor: isValid ? '#d9d9d9' : '#d61111',
-          borderRadius: 4,
-          paddingTop: 2,
-          paddingBottom: 2,
-          paddingRight: 6,
-          paddingLeft: 6,
-          marginLeft: 4,
-          marginRight: 4,
-          display: 'flex',
-          cursor: 'pointer',
-        })}
+        className={styles.recipient.container({isValid})}
       >
         {children}
         <button
           ref={n => (this.button = n)}
-          className={css({
-            WebkitAppearance: 'none',
-            marginLeft: 6,
-            color: '#868686',
-            backgroundColor: '#f5f5f5',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 2,
-          })}
+          className={styles.recipient.button}
           onClick={onRemove}
         >
           x

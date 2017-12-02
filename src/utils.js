@@ -7,7 +7,7 @@ const allContacts = starWarsNames.all.map(s => ({
   id: s.toLowerCase(),
 }))
 
-function getContacts(searchValue, {omitContacts, limit}) {
+function getContacts(searchValue, {omitContacts = [], limit} = {}) {
   const remainingContacts = allContacts.filter(
     c => !omitContacts.some(sc => sc.id === c.id),
   )
@@ -22,7 +22,7 @@ function getContacts(searchValue, {omitContacts, limit}) {
   return limitedContacts
 }
 
-function fetchContacts(searchValue, {omitContacts, limit, requestId}) {
+function fetchContacts(searchValue, {omitContacts, limit, requestId} = {}) {
   return new Promise(resolve => {
     setTimeout(() => {
       resolve({

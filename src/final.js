@@ -4,6 +4,7 @@ import {css} from 'glamor'
 import Downshift from 'downshift'
 import {List} from 'react-virtualized'
 import {ComposeMail, Recipient} from './components'
+import * as styles from './styles'
 import debounce from 'debounce-fn'
 import {fetchContacts} from './utils'
 
@@ -24,18 +25,13 @@ function ContactList({highlightedIndex, getItemProps, contacts, setItemCount}) {
             item: contacts[index],
             index,
             style,
-            className: css({
-              cursor: 'pointer',
-              paddingLeft: 10,
-              paddingRight: 10,
-              backgroundColor: highlightedIndex === index ? '#eee' : 'white',
+            className: styles.contact.container({
+              isHighlighted: highlightedIndex === index,
             }),
           })}
         >
           <div>{contacts[index].name}</div>
-          <div className={css({fontSize: '0.8em', marginLeft: 2})}>
-            {contacts[index].email}
-          </div>
+          <div className={styles.contact.email}>{contacts[index].email}</div>
         </div>
       )}
     />
@@ -52,7 +48,6 @@ class FetchContacts extends React.Component {
   }
   fetch = debounce(
     () => {
-      console.log('here')
       if (!this.mounted) {
         return
       }
@@ -191,14 +186,7 @@ class RecipientInput extends React.Component {
             <label {...getLabelProps({style: {display: 'none'}})}>
               Select your recipients
             </label>
-            <div
-              className={css({
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-              })}
-            >
+            <div className={styles.input.container}>
               {selectedContacts.map(c => (
                 <Recipient
                   key={c.id}
@@ -220,16 +208,8 @@ class RecipientInput extends React.Component {
                       reset,
                       inputValue,
                     }),
-                  placeholder: 'Enter recipients',
-                  className: css({
-                    flex: 1,
-                    border: 'none',
-                    paddingTop: 10,
-                    paddingBottom: 10,
-                    outline: 'none',
-                    width: '100%',
-                    minWidth: '100',
-                  }),
+                  placeholder: 'Enter recipient',
+                  className: styles.input.input,
                 })}
               />
             </div>
@@ -245,19 +225,11 @@ class RecipientInput extends React.Component {
                   }
                 }}
                 render={({loading, contacts, error}) => (
-                  <div
-                    className={css({
-                      position: 'absolute',
-                      backgroundColor: 'white',
-                      width: 300,
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                      border: '1px solid rgba(0,0,0,.2)',
-                    })}
-                  >
+                  <div className={styles.menu.container({final: true})}>
                     {loading ? (
-                      <div className={css({padding: 10})}>loading...</div>
+                      <div className={styles.menu.status}>loading...</div>
                     ) : error ? (
-                      <div className={css({padding: 10})}>error...</div>
+                      <div className={styles.menu.status}>error...</div>
                     ) : contacts.length ? (
                       <ContactList
                         highlightedIndex={highlightedIndex}
@@ -265,7 +237,7 @@ class RecipientInput extends React.Component {
                         contacts={contacts}
                       />
                     ) : (
-                      <div className={css({padding: 10})}>no results...</div>
+                      <div className={styles.menu.status}>no results...</div>
                     )}
                   </div>
                 )}
