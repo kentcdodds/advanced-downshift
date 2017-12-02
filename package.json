@@ -3,6 +3,7 @@
   "description": "This is an example of how to use downshift to build a gmail-like recipient field.",
   "version": "0.0.196",
   "dependencies": {
+    "debounce-fn": "^1.0.0",
     "starwars-names": "^1.6.0",
     "react-dom": "^16.1.1",
     "react": "^16.1.1",
