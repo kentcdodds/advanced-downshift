@@ -12,6 +12,7 @@ class RecipientInput extends React.Component {
       <Downshift
         itemToString={this.itemToString}
         defaultHighlightedIndex={0}
+        onChange={this.props.onChange}
         render={({
           getLabelProps,
           getInputProps,
@@ -22,8 +23,12 @@ class RecipientInput extends React.Component {
           inputValue,
         }) => (
           <div>
-            <label {...getLabelProps({style: {display: 'none'}})}>
-              Select your recipients
+            <label
+              {...getLabelProps({
+                style: {display: 'none'},
+              })}
+            >
+              Select your recipient
             </label>
             <div className={styles.input.container}>
               <input

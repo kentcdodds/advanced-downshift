@@ -101,7 +101,7 @@ class FetchContacts extends React.Component {
 
 class RecipientInput extends React.Component {
   state = {selectedContacts: []}
-  handleSelect = (selectedContact, downshift) => {
+  handleChange = (selectedContact, downshift) => {
     this.setState(
       ({selectedContacts}) => ({
         selectedContacts: [...selectedContacts, selectedContact],
@@ -165,7 +165,7 @@ class RecipientInput extends React.Component {
       <Downshift
         itemToString={this.itemToString}
         selectedItem={null}
-        onSelect={this.handleSelect}
+        onChange={this.handleChange}
         defaultHighlightedIndex={0}
         render={({
           getLabelProps,
