@@ -35,13 +35,13 @@ const input = {
 }
 
 const menu = {
-  container: ({final} = {}) =>
+  container: ({windowed} = {}) =>
     css({
       position: 'absolute',
       backgroundColor: 'white',
       width: 300,
-      maxHeight: final ? null : 280,
-      overflow: final ? null : 'scroll',
+      maxHeight: windowed ? null : 280,
+      overflow: windowed ? null : 'scroll',
       boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
       border: '1px solid rgba(0,0,0,.2)',
     }),

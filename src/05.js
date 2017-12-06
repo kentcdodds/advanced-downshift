@@ -65,7 +65,7 @@ function RecipientInput({onChange}) {
             />
           </div>
           {!isOpen ? null : (
-            <div className={styles.menu.container()}>
+            <div className={styles.menu.container({windowed: true})}>
               <ContactList
                 highlightedIndex={highlightedIndex}
                 getItemProps={getItemProps}
