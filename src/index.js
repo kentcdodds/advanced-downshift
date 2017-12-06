@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import {render} from 'react-dom'
 import {ComposeMail} from './components'
-import RecipientInput from './01'
+import RecipientInput from './02'
 
 class App extends React.Component {
   state = {selection: null}
