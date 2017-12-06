@@ -9,14 +9,23 @@ function RecipientInput({onChange}) {
     <Downshift
       itemToString={i => (i ? i.email : '')}
       onChange={onChange}
-      render={({getInputProps, getItemProps, isOpen, inputValue}) => (
+      render={({
+        getInputProps,
+        getItemProps,
+        isOpen,
+        inputValue,
+        selectedItem,
+      }) => (
         <div>
           <div>
             <input {...getInputProps()} />
           </div>
           {!isOpen ? null : (
             <div>
-              {getContacts(inputValue).map((contact, index) => (
+              {getContacts(inputValue, {
+                limit: 10,
+                omitContacts: [selectedItem],
+              }).map((contact, index) => (
                 <div
                   key={contact.id}
                   {...getItemProps({

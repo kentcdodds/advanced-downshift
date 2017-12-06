@@ -9,7 +9,7 @@ const allContacts = starWarsNames.all.map(s => ({
 
 function getContacts(searchValue, {omitContacts = [], limit} = {}) {
   const remainingContacts = allContacts.filter(
-    c => !omitContacts.some(sc => sc.id === c.id),
+    c => !omitContacts.some(sc => sc && sc.id === c.id),
   )
   const sortedContacts = searchValue
     ? matchSorter(remainingContacts, searchValue, {

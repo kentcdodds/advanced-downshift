@@ -11,11 +11,13 @@ function RecipientInput({onChange}) {
       onChange={onChange}
       defaultHighlightedIndex={0}
       render={({
+        getLabelProps,
         getInputProps,
         getItemProps,
         isOpen,
         highlightedIndex,
         inputValue,
+        selectedItem,
       }) => (
         <div>
           <label {...getLabelProps({style: {display: 'none'}})}>
@@ -31,7 +33,10 @@ function RecipientInput({onChange}) {
           </div>
           {!isOpen ? null : (
             <div className={styles.menu.container()}>
-              {getContacts(inputValue).map((contact, index) => (
+              {getContacts(inputValue, {
+                limit: 10,
+                omitContacts: [selectedItem],
+              }).map((contact, index) => (
                 <div
                   key={contact.id}
                   {...getItemProps({
