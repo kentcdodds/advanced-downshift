@@ -1,12 +1,10 @@
+// multi-selection part 3 (tab for selecting the highlighted item) // TODO...
 import React, {Component} from 'react'
-import {render} from 'react-dom'
-import {css} from 'glamor'
 import Downshift from 'downshift'
 import {List} from 'react-virtualized'
 import {Recipient} from './components'
 import * as styles from './styles'
-import debounce from 'debounce-fn'
-import {fetchContacts} from './utils'
+import {getContacts} from './utils'
 
 class RecipientInput extends React.Component {
   state = {selectedContacts: []}
@@ -34,14 +32,13 @@ class RecipientInput extends React.Component {
   }
   handleInputKeyDown = ({
     event,
-    isOpen,
-    selectHighlightedItem,
-    highlightedIndex,
     reset,
-    inputValue,
+    isOpen,
+    highlightedIndex,
+    selectHighlightedItem,
   }) => {
-    if (event.key === 'Backspace' && !event.target.value) {
-      // remove the last input
+    const inputValue = event.target.value
+    if (event.key === 'Backspace' && !inputValue) {
       this.setState(
         ({selectedContacts}) => ({
           selectedContacts: selectedContacts.length
@@ -55,9 +52,10 @@ class RecipientInput extends React.Component {
       )
     } else if (isOpen && ['Tab', ',', ';'].includes(event.key)) {
       event.preventDefault()
+      console.log(inputValue, highlightedIndex, highlightedIndex != null)
       if (highlightedIndex != null) {
         selectHighlightedItem()
-      } else {
+      } else if (inputValue) {
         this.setState(
           ({selectedContacts}) => ({
             selectedContacts: [
@@ -81,27 +79,25 @@ class RecipientInput extends React.Component {
     return i ? (i.name === i.email ? i.name : `${i.name} (${i.email})`) : ''
   }
   render() {
+    const {onChange} = this.props
     const {selectedContacts} = this.state
     return (
       <Downshift
         itemToString={this.itemToString}
-        selectedItem={null}
         onChange={this.handleChange}
         defaultHighlightedIndex={0}
+        selectedItem={null}
         render={({
           getLabelProps,
           getInputProps,
           getItemProps,
           isOpen,
-          toggleMenu,
-          clearSelection,
           highlightedIndex,
           selectHighlightedItem,
-          setHighlightedIndex,
-          reset,
           inputValue,
-          clearItems,
+          selectedItem,
           setItemCount,
+          reset,
         }) => (
           <div>
             <label {...getLabelProps({style: {display: 'none'}})}>
@@ -123,11 +119,10 @@ class RecipientInput extends React.Component {
                   onKeyDown: event =>
                     this.handleInputKeyDown({
                       event,
-                      selectHighlightedItem,
-                      highlightedIndex,
-                      isOpen,
                       reset,
-                      inputValue,
+                      isOpen,
+                      highlightedIndex,
+                      selectHighlightedItem,
                     }),
                   placeholder: 'Enter recipient',
                   className: styles.input.input,
@@ -135,34 +130,16 @@ class RecipientInput extends React.Component {
               />
             </div>
             {!isOpen ? null : (
-              <FetchContacts
-                searchValue={inputValue}
-                omitContacts={selectedContacts}
-                onLoaded={({contacts}) => {
-                  clearItems()
-                  if (contacts) {
-                    setHighlightedIndex(contacts.length ? 0 : null)
-                    setItemCount(contacts.length)
-                  }
-                }}
-                render={({loading, contacts, error}) => (
-                  <div className={styles.menu.container({final: true})}>
-                    {loading ? (
-                      <div className={styles.menu.status}>loading...</div>
-                    ) : error ? (
-                      <div className={styles.menu.status}>error...</div>
-                    ) : contacts.length ? (
-                      <ContactList
-                        highlightedIndex={highlightedIndex}
-                        getItemProps={getItemProps}
-                        contacts={contacts}
-                      />
-                    ) : (
-                      <div className={styles.menu.status}>no results...</div>
-                    )}
-                  </div>
-                )}
-              />
+              <div className={styles.menu.container({windowed: true})}>
+                <ContactList
+                  highlightedIndex={highlightedIndex}
+                  getItemProps={getItemProps}
+                  contacts={getContacts(inputValue, {
+                    omitContacts: selectedContacts,
+                  })}
+                  setItemCount={setItemCount}
+                />
+              </div>
             )}
           </div>
         )}
@@ -174,6 +151,7 @@ class RecipientInput extends React.Component {
 function ContactList({highlightedIndex, getItemProps, contacts, setItemCount}) {
   const rowHeight = 40
   const fullHeight = contacts.length * rowHeight
+  setItemCount(contacts.length)
   return (
     <List
       width={300}
@@ -199,67 +177,6 @@ function ContactList({highlightedIndex, getItemProps, contacts, setItemCount}) {
       )}
     />
   )
-}
-
-class FetchContacts extends React.Component {
-  static initialState = {loading: false, error: null, contacts: []}
-  requestId = 0
-  state = FetchContacts.initialState
-  mounted = false
-  reset(overrides) {
-    this.setState({...FetchContacts.initialState, ...overrides})
-  }
-  fetch = debounce(
-    () => {
-      if (!this.mounted) {
-        return
-      }
-      const {omitContacts, limit} = this.props
-      this.requestId++
-      fetchContacts(this.props.searchValue, {
-        omitContacts,
-        limit,
-        requestId: this.requestId,
-      }).then(
-        ({response: {data: contacts, requestId}}) => {
-          if (this.mounted && requestId === this.requestId) {
-            this.props.onLoaded({contacts})
-            this.setState({loading: false, contacts})
-          }
-        },
-        ({response: {error, requestId}}) => {
-          if (this.mounted && requestId === this.requestId) {
-            this.props.onLoaded({error})
-            this.setState({loading: false, error})
-          }
-        },
-      )
-    },
-    {wait: 300},
-  )
-  prepareFetch() {
-    this.reset({loading: true})
-  }
-  componentDidMount() {
-    this.mounted = true
-    this.prepareFetch()
-    this.fetch()
-  }
-  componentDidUpdate(prevProps) {
-    if (
-      prevProps.searchValue !== this.props.searchValue ||
-      prevProps.omitContacts !== this.props.omitContacts
-    ) {
-      this.prepareFetch()
-      this.fetch()
-    }
-  }
-  componentWillUnmount() {
-    this.mounted = false
-  }
-  render() {
-    return this.props.render(this.state)
-  }
 }
 
 export default RecipientInput

@@ -80,6 +80,9 @@ function ComposeMail({autocomplete}) {
 }
 
 class Recipient extends React.Component {
+  static defaultProps = {
+    isValid: true,
+  }
   focusButton = () => this.button.focus()
   render() {
     const {children, onRemove, isValid} = this.props
@@ -89,13 +92,15 @@ class Recipient extends React.Component {
         className={styles.recipient.container({isValid})}
       >
         {children}
-        <button
-          ref={n => (this.button = n)}
-          className={styles.recipient.button}
-          onClick={onRemove}
-        >
-          x
-        </button>
+        {onRemove ? (
+          <button
+            ref={n => (this.button = n)}
+            className={styles.recipient.button}
+            onClick={onRemove}
+          >
+            x
+          </button>
+        ) : null}
       </div>
     )
   }

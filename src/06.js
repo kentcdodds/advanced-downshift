@@ -1,4 +1,4 @@
-// windowing part 1
+// windowing part 2
 import React, {Component} from 'react'
 import Downshift from 'downshift'
 import {List} from 'react-virtualized'
@@ -19,6 +19,7 @@ function RecipientInput({onChange}) {
         highlightedIndex,
         inputValue,
         selectedItem,
+        setItemCount,
       }) => (
         <div>
           <label {...getLabelProps({style: {display: 'none'}})}>
@@ -40,6 +41,7 @@ function RecipientInput({onChange}) {
                 contacts={getContacts(inputValue, {
                   omitContacts: [selectedItem],
                 })}
+                setItemCount={setItemCount}
               />
             </div>
           )}
@@ -49,9 +51,10 @@ function RecipientInput({onChange}) {
   )
 }
 
-function ContactList({highlightedIndex, getItemProps, contacts}) {
+function ContactList({highlightedIndex, getItemProps, contacts, setItemCount}) {
   const rowHeight = 40
   const fullHeight = contacts.length * rowHeight
+  setItemCount(contacts.length)
   return (
     <List
       width={300}
